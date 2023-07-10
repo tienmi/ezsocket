@@ -1,0 +1,24 @@
+{
+  "name": "ezsocket",
+  "version": "0.0.1",
+  "description": "Simple and easy-to-use basic socket package",
+  "author": "tienmi",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "main": "socket.es.js",
+  "devDependencies": {
+    "@types/node": "^20.4.1",
+    "typescript": "^5.0.2",
+    "vite": "^4.4.0",
+    "vite-plugin-dts": "^3.2.0"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/tienmi/ezsocket",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tienmi/ezsocket.git"
+  }
+}

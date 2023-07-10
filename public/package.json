@@ -1,0 +1,9 @@
+{
+    "name": "base-websocket",
+    "version": "1.0.9",
+    "description": "webSocket basic module",
+    "license": "MIT",
+    "main": "./socket.es.js",
+    "author": "tienmi",
+    "types": "./socket.d.ts"
+}
