@@ -8,7 +8,7 @@ interface Init {
   onResponse: (res) => void;
   onError: (error: Event) => void;
   onClose: (e: CloseEvent) => void;
-  retryAttempts?: number;
+  retry?: number;
 }
 
 type Send = <obj>(data: Data<obj>) => void;
@@ -25,7 +25,7 @@ function initWebSocket({
   onResponse = function () {},
   onError = function () {},
   onClose = function () {},
-  retryAttempts = 0
+  retry = 0
 }: Init) {
   if (connected) return;
   connected = true;
@@ -61,7 +61,7 @@ function initWebSocket({
   };
 
   ws.onclose = (e: CloseEvent) => {
-      if (e.code !== 1000 && retries < retryAttempts) {
+      if (e.code !== 1000 && retries < retry) {
           retries++;
           console.log(`WS connection lost, attempting to reconnect... (attempt ${retries})`);
           setTimeout(() => {
@@ -71,7 +71,7 @@ function initWebSocket({
                   onResponse,
                   onError,
                   onClose,
-                  retryAttempts
+                  retry
               });
           }, retries * 1000);
       } else {
