@@ -1,6 +1,6 @@
 {
     "name": "base-websocket",
-    "version": "1.0.9",
+    "version": "1.0.11",
     "description": "webSocket basic module",
     "license": "MIT",
     "main": "./socket.es.js",

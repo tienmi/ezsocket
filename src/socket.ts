@@ -5,7 +5,7 @@ interface Data<obj> {
 interface Init {
   url: string;
   onOpen: () => void;
-  onResponse: (res) => void;
+  onResponse: (res: any) => void;
   onError: (error: Event) => void;
   onClose: (e: CloseEvent) => void;
   retry?: number;
@@ -25,7 +25,7 @@ function initWebSocket({
   onResponse = function () {},
   onError = function () {},
   onClose = function () {},
-  retry = 0
+  retry = 0,
 }: Init) {
   if (connected) return;
   connected = true;
@@ -33,50 +33,52 @@ function initWebSocket({
   const ws = new WebSocket(url);
   let retries = 0;
 
-  send = data => {
-      ws!.send(JSON.stringify(data));
+  send = (data) => {
+    ws!.send(JSON.stringify(data));
   };
 
   closeWS = () => {
-      console.log("WS CLOSE");
-      ws.close();
-      connected = false;
+    console.log("WS CLOSE");
+    ws.close();
+    connected = false;
   };
 
   ws.onopen = () => {
-      retries = 0;
-      onOpen();
+    retries = 0;
+    onOpen();
   };
 
-  ws.onmessage = async msg => {
-      const res = JSON.parse(await new Response(msg.data).text());
-      if (res) onResponse(res);
+  ws.onmessage = async (msg) => {
+    const res = JSON.parse(await new Response(msg.data).text());
+    if (res) onResponse(res);
   };
 
-  ws.onerror = error => {
-      console.log("ERROR: ", error);
-      connected = false;
-      onError(error);
-      ws.close();
+  ws.onerror = (error) => {
+    console.log("ERROR: ", error);
+    connected = false;
+    onError(error);
+    ws.close();
   };
 
   ws.onclose = (e: CloseEvent) => {
-      if (e.code !== 1000 && retries < retry) {
-          retries++;
-          console.log(`WS connection lost, attempting to reconnect... (attempt ${retries})`);
-            initWebSocket({
-                url,
-                onOpen,
-                onResponse,
-                onError,
-                onClose,
-                retry
-            });
-      } else {
-          console.log("CLOSE");
-          onClose(e);
-          connected = false;
-      }
+    if (e.code !== 1000 && retries < retry) {
+      retries++;
+      console.log(
+        `WS connection lost, attempting to reconnect... (attempt ${retries})`
+      );
+      initWebSocket({
+        url,
+        onOpen,
+        onResponse,
+        onError,
+        onClose,
+        retry,
+      });
+    } else {
+      console.log("CLOSE");
+      onClose(e);
+      connected = false;
+    }
   };
 }
 export { initWebSocket, send, closeWS };
