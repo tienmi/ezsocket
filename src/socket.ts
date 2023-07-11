@@ -64,16 +64,14 @@ function initWebSocket({
       if (e.code !== 1000 && retries < retry) {
           retries++;
           console.log(`WS connection lost, attempting to reconnect... (attempt ${retries})`);
-          setTimeout(() => {
-              initWebSocket({
-                  url,
-                  onOpen,
-                  onResponse,
-                  onError,
-                  onClose,
-                  retry
-              });
-          }, retries * 1000);
+            initWebSocket({
+                url,
+                onOpen,
+                onResponse,
+                onError,
+                onClose,
+                retry
+            });
       } else {
           console.log("CLOSE");
           onClose(e);
