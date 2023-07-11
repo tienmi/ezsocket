@@ -5,9 +5,10 @@ interface Data<obj> {
 interface Init {
   url: string;
   onOpen: () => void;
-  onResponse: (res: any) => void;
-  onError: () => void;
-  onClose: () => void;
+  onResponse: (res) => void;
+  onError: (error: Event) => void;
+  onClose: (e: CloseEvent) => void;
+  retry?: number;
 }
 
 type Send = <obj>(data: Data<obj>) => void;
@@ -24,42 +25,58 @@ function initWebSocket({
   onResponse = function () {},
   onError = function () {},
   onClose = function () {},
+  retry = 0
 }: Init) {
   if (connected) return;
   connected = true;
 
   const ws = new WebSocket(url);
+  let retries = 0;
 
-  send = (data) => {
-    ws!.send(JSON.stringify(data));
+  send = data => {
+      ws!.send(JSON.stringify(data));
   };
 
   closeWS = () => {
-    console.log("WS CLOSE");
-    onClose();
-    ws.close();
-    connected = false;
+      console.log("WS CLOSE");
+      ws.close();
+      connected = false;
   };
 
   ws.onopen = () => {
-    onOpen();
+      retries = 0;
+      onOpen();
   };
 
-  ws.onmessage = async (msg) => {
-    const res = JSON.parse(await new Response(msg.data).text());
-    if (res) onResponse(res);
+  ws.onmessage = async msg => {
+      const res = JSON.parse(await new Response(msg.data).text());
+      if (res) onResponse(res);
   };
 
-  ws.onerror = (error) => {
-    console.log("ERROR: ", error);
-    connected = false;
-    ws.close();
-    onError();
+  ws.onerror = error => {
+      console.log("ERROR: ", error);
+      connected = false;
+      onError(error);
+      ws.close();
   };
 
-  ws.onclose = () => {
-    console.log("CLOSE");
+  ws.onclose = (e: CloseEvent) => {
+      if (e.code !== 1000 && retries < retry) {
+          retries++;
+          console.log(`WS connection lost, attempting to reconnect... (attempt ${retries})`);
+            initWebSocket({
+                url,
+                onOpen,
+                onResponse,
+                onError,
+                onClose,
+                retry
+            });
+      } else {
+          console.log("CLOSE");
+          onClose(e);
+          connected = false;
+      }
   };
 }
-
 export { initWebSocket, send, closeWS };
